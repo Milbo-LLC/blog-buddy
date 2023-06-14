@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <Page>
       <div className="flex w-full h-full justify-center">
-        <div className="flex flex-col gap-2 w-full h-full max-w-4xl">
+        <div className="flex flex-col gap-2 w-full h-full max-w-4xl px-4 md:py-0">
           <div className="flex w-fit items-center gap-1 p-2 hover:bg-white/20 rounded-lg cursor-pointer">
             <MdPhoto className="text-2xl" />
             <div>Add cover</div>

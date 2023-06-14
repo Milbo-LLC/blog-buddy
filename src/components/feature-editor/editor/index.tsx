@@ -21,6 +21,8 @@ import ListMaxIndentLevelPlugin from "../plugins/ListMaxIndentLevelPlugin";
 import CodeHighlightPlugin from "../plugins/CodeHighlightPlugin";
 import AutoLinkPlugin from "../plugins/AutoLinkPlugin";
 import FloatingTextFormatToolbarPlugin from "../plugins/FloatingTextFormatToolbarPlugin";
+import DraggableBlockPlugin from "../plugins/DraggableBlockPlugin";
+import { useState } from "react";
 
 function Placeholder() {
   return <div className="editor-placeholder">Enter some rich text...</div>;
@@ -51,12 +53,27 @@ const editorConfig = {
 };
 
 export default function Editor() {
+  const [floatingAnchorElem, setFloatingAnchorElem] =
+    useState<HTMLDivElement | null>(null);
+  const [isSmallWidthViewport, setIsSmallWidthViewport] =
+    useState<boolean>(false);
+
+  const onRef = (_floatingAnchorElem: HTMLDivElement) => {
+    if (_floatingAnchorElem !== null) {
+      setFloatingAnchorElem(_floatingAnchorElem);
+    }
+  };
+
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container w-full">
         <div className="editor-inner relative bg-black">
           <RichTextPlugin
-            contentEditable={<ContentEditable className="editor-input" />}
+            contentEditable={
+              <div ref={onRef}>
+                <ContentEditable className="editor-input" />
+              </div>
+            }
             placeholder={<Placeholder />}
             ErrorBoundary={LexicalErrorBoundary}
           />
@@ -69,6 +86,11 @@ export default function Editor() {
           <ListMaxIndentLevelPlugin maxDepth={7} />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <FloatingTextFormatToolbarPlugin />
+          {floatingAnchorElem && !isSmallWidthViewport && (
+            <>
+              <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+            </>
+          )}
         </div>
       </div>
     </LexicalComposer>
