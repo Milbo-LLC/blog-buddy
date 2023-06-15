@@ -156,6 +156,8 @@ export function InsertImageDialog({
   }, [activeEditor]);
 
   const onClick = (payload: InsertImagePayload) => {
+    console.log("onClick - payload: ", payload);
+    console.log("activeEditor: ", activeEditor);
     activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
     onClose();
   };

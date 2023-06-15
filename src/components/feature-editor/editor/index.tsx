@@ -25,7 +25,7 @@ import FloatingTextFormatToolbarPlugin from "../plugins/FloatingTextFormatToolba
 import DraggableBlockPlugin from "../plugins/DraggableBlockPlugin";
 import { useEffect, useState } from "react";
 import ToolbarPlugin from "../plugins/ToolbarPlugin";
-import TitlePlugin from "../plugins/TitlePlugin";
+import HeaderPlugin from "../plugins/HeaderPlugin";
 
 const editorConfig = {
   // The editor theme
@@ -84,7 +84,7 @@ export default function Editor() {
     <LexicalComposer initialConfig={editorConfig}>
       <div className="flex flex-col gap-2 w-full h-fit pl-2 lg:pl-7">
         <ToolbarPlugin />
-        <TitlePlugin />
+        <HeaderPlugin />
       </div>
       <div className="editor-inner relative">
         <RichTextPlugin
