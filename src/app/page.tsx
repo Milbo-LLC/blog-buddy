@@ -7,16 +7,6 @@ export default function Home() {
     <Page>
       <div className="flex w-full h-full justify-center">
         <div className="flex flex-col gap-2 w-full h-full max-w-4xl">
-          <div className="flex flex-col gap-2 w-full h-fit pl-2 lg:pl-7">
-            <div className="flex w-fit items-center gap-1 p-2 -mx-2 hover:bg-white/20 rounded-lg cursor-pointer">
-              <MdPhoto className="text-2xl" />
-              <div>Add cover</div>
-            </div>
-            <input
-              className="text-4xl font-bold outline-none bg-transparent"
-              placeholder="Untitled"
-            />
-          </div>
           <Editor />
         </div>
       </div>

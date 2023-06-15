@@ -3,7 +3,6 @@
 import ExampleTheme from "../themes/ExampleTheme";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-// import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
@@ -25,14 +24,8 @@ import AutoLinkPlugin from "../plugins/AutoLinkPlugin";
 import FloatingTextFormatToolbarPlugin from "../plugins/FloatingTextFormatToolbarPlugin";
 import DraggableBlockPlugin from "../plugins/DraggableBlockPlugin";
 import { useEffect, useState } from "react";
-
-function Placeholder() {
-  return (
-    <div className="absolute top-4 left-[10px] opacity-40 z-0">
-      Enter some rich text...
-    </div>
-  );
-}
+import ToolbarPlugin from "../plugins/ToolbarPlugin";
+import TitlePlugin from "../plugins/TitlePlugin";
 
 const editorConfig = {
   // The editor theme
@@ -89,34 +82,36 @@ export default function Editor() {
 
   return (
     <LexicalComposer initialConfig={editorConfig}>
-      <div className="editor-container w-full">
-        <div className="editor-inner relative">
-          <RichTextPlugin
-            contentEditable={
-              <div className="">
-                <div className="" ref={onRef}>
-                  <LexicalContentEditable />
-                </div>
+      <div className="flex flex-col gap-2 w-full h-fit pl-2 lg:pl-7">
+        <ToolbarPlugin />
+        <TitlePlugin />
+      </div>
+      <div className="editor-inner relative">
+        <RichTextPlugin
+          contentEditable={
+            <div className="">
+              <div className="" ref={onRef}>
+                <LexicalContentEditable />
               </div>
-            }
-            placeholder={<div />}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <AutoFocusPlugin />
-          <CodeHighlightPlugin />
-          <ListPlugin />
-          <LinkPlugin />
-          <AutoLinkPlugin />
-          <ListMaxIndentLevelPlugin maxDepth={7} />
-          <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-          <FloatingTextFormatToolbarPlugin />
-          {floatingAnchorElem && !isSmallWidthViewport && (
-            <>
-              <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-            </>
-          )}
-        </div>
+            </div>
+          }
+          placeholder={<div />}
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <HistoryPlugin />
+        <AutoFocusPlugin />
+        <CodeHighlightPlugin />
+        <ListPlugin />
+        <LinkPlugin />
+        <AutoLinkPlugin />
+        <ListMaxIndentLevelPlugin maxDepth={7} />
+        <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+        <FloatingTextFormatToolbarPlugin />
+        {floatingAnchorElem && !isSmallWidthViewport && (
+          <>
+            <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+          </>
+        )}
       </div>
     </LexicalComposer>
   );
