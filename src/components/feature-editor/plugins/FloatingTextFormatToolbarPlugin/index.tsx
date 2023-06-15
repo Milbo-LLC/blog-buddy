@@ -13,7 +13,25 @@ import {
   LexicalEditor,
   SELECTION_CHANGE_COMMAND,
   TextFormatType,
+  $createParagraphNode,
+  DEPRECATED_$isGridSelection,
+  FORMAT_ELEMENT_COMMAND,
+  OUTDENT_CONTENT_COMMAND,
+  INDENT_CONTENT_COMMAND,
 } from "lexical";
+import { $setBlocksType } from "@lexical/selection";
+import {
+  $createHeadingNode,
+  $createQuoteNode,
+  HeadingTagType,
+} from "@lexical/rich-text";
+import {
+  INSERT_CHECK_LIST_COMMAND,
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+  REMOVE_LIST_COMMAND,
+} from "@lexical/list";
+import { $createCodeNode } from "@lexical/code";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as React from "react";
 import { createPortal } from "react-dom";
@@ -33,7 +51,282 @@ import {
   MdSuperscript,
 } from "react-icons/md";
 import { IconType } from "react-icons";
+import DropDown, { DropDownItem } from "@/components/ui/form-fields/DropDown";
 // import { INSERT_INLINE_COMMAND } from "../CommentPlugin";
+
+const blockTypeToBlockName = {
+  bullet: "Bulleted List",
+  check: "Check List",
+  code: "Code Block",
+  h1: "Heading 1",
+  h2: "Heading 2",
+  h3: "Heading 3",
+  h4: "Heading 4",
+  h5: "Heading 5",
+  h6: "Heading 6",
+  number: "Numbered List",
+  paragraph: "Normal",
+  quote: "Quote",
+};
+
+const rootTypeToRootName = {
+  root: "Root",
+  table: "Table",
+};
+
+function dropDownActiveClass(active: boolean) {
+  if (active) return "active dropdown-item-active";
+  else return "";
+}
+
+function BlockFormatDropDown({
+  editor,
+  blockType,
+  rootType,
+  disabled = false,
+}: {
+  blockType: keyof typeof blockTypeToBlockName;
+  rootType: keyof typeof rootTypeToRootName;
+  editor: LexicalEditor;
+  disabled?: boolean;
+}): JSX.Element {
+  const formatParagraph = () => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if (
+        $isRangeSelection(selection) ||
+        DEPRECATED_$isGridSelection(selection)
+      ) {
+        $setBlocksType(selection, () => $createParagraphNode());
+      }
+    });
+  };
+
+  const formatHeading = (headingSize: HeadingTagType) => {
+    if (blockType !== headingSize) {
+      editor.update(() => {
+        const selection = $getSelection();
+        if (
+          $isRangeSelection(selection) ||
+          DEPRECATED_$isGridSelection(selection)
+        ) {
+          $setBlocksType(selection, () => $createHeadingNode(headingSize));
+        }
+      });
+    }
+  };
+
+  const formatBulletList = () => {
+    if (blockType !== "bullet") {
+      editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
+    } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
+  };
+
+  const formatCheckList = () => {
+    if (blockType !== "check") {
+      editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+    } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
+  };
+
+  const formatNumberedList = () => {
+    if (blockType !== "number") {
+      editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
+    } else {
+      editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
+    }
+  };
+
+  const formatQuote = () => {
+    if (blockType !== "quote") {
+      editor.update(() => {
+        const selection = $getSelection();
+        if (
+          $isRangeSelection(selection) ||
+          DEPRECATED_$isGridSelection(selection)
+        ) {
+          $setBlocksType(selection, () => $createQuoteNode());
+        }
+      });
+    }
+  };
+
+  const formatCode = () => {
+    if (blockType !== "code") {
+      editor.update(() => {
+        let selection = $getSelection();
+
+        if (
+          $isRangeSelection(selection) ||
+          DEPRECATED_$isGridSelection(selection)
+        ) {
+          if (selection.isCollapsed()) {
+            $setBlocksType(selection, () => $createCodeNode());
+          } else {
+            const textContent = selection.getTextContent();
+            const codeNode = $createCodeNode();
+            selection.insertNodes([codeNode]);
+            selection = $getSelection();
+            if ($isRangeSelection(selection))
+              selection.insertRawText(textContent);
+          }
+        }
+      });
+    }
+  };
+
+  return (
+    <DropDown
+      disabled={disabled}
+      buttonClassName="toolbar-item block-controls"
+      buttonIconClassName={"icon block-type " + blockType}
+      buttonLabel={blockTypeToBlockName[blockType]}
+      buttonAriaLabel="Formatting options for text style"
+    >
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "paragraph")}
+        onClick={formatParagraph}
+      >
+        <i className="icon paragraph" />
+        <span className="text">Normal</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "h1")}
+        onClick={() => formatHeading("h1")}
+      >
+        <i className="icon h1" />
+        <span className="text">Heading 1</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "h2")}
+        onClick={() => formatHeading("h2")}
+      >
+        <i className="icon h2" />
+        <span className="text">Heading 2</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "h3")}
+        onClick={() => formatHeading("h3")}
+      >
+        <i className="icon h3" />
+        <span className="text">Heading 3</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "bullet")}
+        onClick={formatBulletList}
+      >
+        <i className="icon bullet-list" />
+        <span className="text">Bullet List</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "number")}
+        onClick={formatNumberedList}
+      >
+        <i className="icon numbered-list" />
+        <span className="text">Numbered List</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "check")}
+        onClick={formatCheckList}
+      >
+        <i className="icon check-list" />
+        <span className="text">Check List</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "quote")}
+        onClick={formatQuote}
+      >
+        <i className="icon quote" />
+        <span className="text">Quote</span>
+      </DropDownItem>
+      <DropDownItem
+        className={"item " + dropDownActiveClass(blockType === "code")}
+        onClick={formatCode}
+      >
+        <i className="icon code" />
+        <span className="text">Code Block</span>
+      </DropDownItem>
+    </DropDown>
+  );
+}
+
+function AlignmentDropDown({
+  isEditable,
+  activeEditor,
+  isRTL,
+}: {
+  isEditable: boolean;
+  activeEditor: LexicalEditor;
+  isRTL: boolean;
+}): JSX.Element {
+  return (
+    <DropDown
+      disabled={!isEditable}
+      buttonLabel="Align"
+      buttonIconClassName="icon left-align"
+      buttonClassName="toolbar-item spaced alignment"
+      buttonAriaLabel="Formatting options for text alignment"
+    >
+      <DropDownItem
+        onClick={() => {
+          activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
+        }}
+        className="item"
+      >
+        <i className="icon left-align" />
+        <span className="text">Left Align</span>
+      </DropDownItem>
+      <DropDownItem
+        onClick={() => {
+          activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
+        }}
+        className="item"
+      >
+        <i className="icon center-align" />
+        <span className="text">Center Align</span>
+      </DropDownItem>
+      <DropDownItem
+        onClick={() => {
+          activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");
+        }}
+        className="item"
+      >
+        <i className="icon right-align" />
+        <span className="text">Right Align</span>
+      </DropDownItem>
+      <DropDownItem
+        onClick={() => {
+          activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
+        }}
+        className="item"
+      >
+        <i className="icon justify-align" />
+        <span className="text">Justify Align</span>
+      </DropDownItem>
+      <DropDownItem
+        onClick={() => {
+          activeEditor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+        }}
+        className="item"
+      >
+        <i className={"icon " + (isRTL ? "indent" : "outdent")} />
+        <span className="text">Outdent</span>
+      </DropDownItem>
+      <DropDownItem
+        onClick={() => {
+          activeEditor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+        }}
+        className="item"
+      >
+        <i className={"icon " + (isRTL ? "outdent" : "indent")} />
+        <span className="text">Indent</span>
+      </DropDownItem>
+    </DropDown>
+  );
+}
 
 function TextFormatFloatingToolbarButton({
   editor,
@@ -56,11 +349,9 @@ function TextFormatFloatingToolbarButton({
         command ? editor.dispatchCommand(FORMAT_TEXT_COMMAND, command) : null;
         onClick ? onClick() : null;
       }}
-      // className={"popup-item spaced " + (isActive ? "active" : "")}
       className={`flex ${
         isActive ? "bg-black text-white" : "hover:bg-black hover:text-white"
       } rounded p-1 mx-0.5`}
-      // aria-label="Format text as bold"
       aria-label={ariaLabel}
     >
       <Icon className="text-xl" />
@@ -69,6 +360,10 @@ function TextFormatFloatingToolbarButton({
 }
 
 function TextFormatFloatingToolbar({
+  activeEditor,
+  blockType,
+  isEditable,
+  rootType,
   editor,
   anchorElem,
   isLink,
@@ -79,7 +374,12 @@ function TextFormatFloatingToolbar({
   isStrikethrough,
   isSubscript,
   isSuperscript,
+  isRTL,
 }: {
+  activeEditor: LexicalEditor;
+  blockType: keyof typeof blockTypeToBlockName;
+  isEditable: boolean;
+  rootType: keyof typeof rootTypeToRootName;
   editor: LexicalEditor;
   anchorElem: HTMLElement;
   isBold: boolean;
@@ -90,6 +390,7 @@ function TextFormatFloatingToolbar({
   isSubscript: boolean;
   isSuperscript: boolean;
   isUnderline: boolean;
+  isRTL: boolean;
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null);
 
@@ -218,6 +519,16 @@ function TextFormatFloatingToolbar({
     >
       {editor.isEditable() && (
         <>
+          {blockType in blockTypeToBlockName && activeEditor === editor && (
+            <>
+              <BlockFormatDropDown
+                disabled={!isEditable}
+                blockType={blockType}
+                rootType={rootType}
+                editor={editor}
+              />
+            </>
+          )}
           <TextFormatFloatingToolbarButton
             editor={editor}
             isActive={isBold}
@@ -275,6 +586,11 @@ function TextFormatFloatingToolbar({
             ariaLabel="Insert link"
             Icon={MdLink}
           />
+          <AlignmentDropDown
+            isEditable={isEditable}
+            activeEditor={activeEditor}
+            isRTL={isRTL}
+          />
         </>
       )}
       {/* <button
@@ -293,6 +609,11 @@ function useFloatingTextFormatToolbar(
   anchorElem: HTMLElement
 ): JSX.Element | null {
   // State variables
+  const [activeEditor, setActiveEditor] = useState(editor);
+  const [blockType, setBlockType] =
+    useState<keyof typeof blockTypeToBlockName>("paragraph");
+  const [rootType, setRootType] =
+    useState<keyof typeof rootTypeToRootName>("root");
   const [isText, setIsText] = useState(false);
   const [isLink, setIsLink] = useState(false);
   const [isBold, setIsBold] = useState(false);
@@ -302,6 +623,8 @@ function useFloatingTextFormatToolbar(
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
   const [isCode, setIsCode] = useState(false);
+  const [isEditable, setIsEditable] = useState(() => editor.isEditable());
+  const [isRTL, setIsRTL] = useState(false);
 
   // Update popup when editor updated
   const updatePopup = useCallback(() => {
@@ -391,6 +714,10 @@ function useFloatingTextFormatToolbar(
 
   return createPortal(
     <TextFormatFloatingToolbar
+      activeEditor={activeEditor}
+      blockType={blockType}
+      isEditable={isEditable}
+      rootType={rootType}
       editor={editor}
       anchorElem={anchorElem}
       isLink={isLink}
@@ -401,6 +728,7 @@ function useFloatingTextFormatToolbar(
       isSuperscript={isSuperscript}
       isUnderline={isUnderline}
       isCode={isCode}
+      isRTL={isRTL}
     />,
     anchorElem
   );

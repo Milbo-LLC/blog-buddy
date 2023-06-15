@@ -3,7 +3,7 @@
 import ExampleTheme from "../themes/ExampleTheme";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+// import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
@@ -16,16 +16,22 @@ import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
+import { CAN_USE_DOM } from "@/components/utils/canUseDOM";
 
+import LexicalContentEditable from "../ui/ContentEditable";
 import ListMaxIndentLevelPlugin from "../plugins/ListMaxIndentLevelPlugin";
 import CodeHighlightPlugin from "../plugins/CodeHighlightPlugin";
 import AutoLinkPlugin from "../plugins/AutoLinkPlugin";
 import FloatingTextFormatToolbarPlugin from "../plugins/FloatingTextFormatToolbarPlugin";
 import DraggableBlockPlugin from "../plugins/DraggableBlockPlugin";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Placeholder() {
-  return <div className="editor-placeholder">Enter some rich text...</div>;
+  return (
+    <div className="absolute top-4 left-[10px] opacity-40 z-0">
+      Enter some rich text...
+    </div>
+  );
 }
 
 const editorConfig = {
@@ -64,17 +70,36 @@ export default function Editor() {
     }
   };
 
+  useEffect(() => {
+    const updateViewPortWidth = () => {
+      const isNextSmallWidthViewport =
+        CAN_USE_DOM && window.matchMedia("(max-width: 1025px)").matches;
+
+      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
+        setIsSmallWidthViewport(isNextSmallWidthViewport);
+      }
+    };
+    updateViewPortWidth();
+    window.addEventListener("resize", updateViewPortWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateViewPortWidth);
+    };
+  }, [isSmallWidthViewport]);
+
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <div className="editor-container w-full">
-        <div className="editor-inner relative bg-black">
+        <div className="editor-inner relative">
           <RichTextPlugin
             contentEditable={
-              <div ref={onRef}>
-                <ContentEditable className="editor-input" />
+              <div className="">
+                <div className="" ref={onRef}>
+                  <LexicalContentEditable />
+                </div>
               </div>
             }
-            placeholder={<Placeholder />}
+            placeholder={<div />}
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />

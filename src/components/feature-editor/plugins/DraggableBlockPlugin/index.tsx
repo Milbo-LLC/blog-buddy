@@ -1,10 +1,3 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
 import "./index.css";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -28,12 +21,11 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { MdDragIndicator } from "react-icons/md";
 
 import { isHTMLElement } from "@/components/utils/guard";
 import { Point } from "@/components/utils/point";
 import { Rect } from "@/components/utils/rect";
-
-import { MdDragIndicator } from "react-icons/md";
 
 const SPACE = 4;
 const TARGET_LINE_HALF_HEIGHT = 2;
@@ -361,16 +353,13 @@ function useDraggableBlockMenu(
   return createPortal(
     <>
       <div
-        className="icon draggable-block-menu bg-gradient-to-r from-white/10 to-white/30"
+        className="icon draggable-block-menu bg-white/80 hover:bg-white"
         ref={menuRef}
         draggable={true}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
       >
-        {/* <div className={isEditable ? "icon" : ""} /> */}
-        <div className="">
-          <MdDragIndicator />
-        </div>
+        <div className={isEditable ? "icon" : ""} />
       </div>
       <div className="draggable-block-target-line" ref={targetLineRef} />
     </>,
