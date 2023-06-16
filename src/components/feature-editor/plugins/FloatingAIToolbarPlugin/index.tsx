@@ -5,6 +5,8 @@ import {
   LexicalEditor,
   SELECTION_CHANGE_COMMAND,
   $getRoot,
+  $getSelection,
+  $createTextNode,
 } from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as React from "react";
@@ -59,15 +61,25 @@ function FloatingAIToolbar({
     }
   }, [popupCharStylesEditorRef]);
 
+  function backToEditor() {
+    editor.focus();
+    editor.update(() => {
+      const lastChild = $getRoot().getLastChild();
+      if (lastChild) {
+        lastChild.clear();
+      }
+    });
+  }
+
   const escFunction = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        console.log("HERE");
-        //Do whatever when esc is pressed
         editor.focus();
         editor.update(() => {
-          const root = $getRoot();
-          root.getLastChild()?.remove();
+          const lastChild = $getRoot().getLastChild();
+          if (lastChild) {
+            lastChild.clear();
+          }
         });
       }
     },
@@ -146,6 +158,7 @@ function FloatingAIToolbar({
     <div
       ref={popupCharStylesEditorRef}
       className="flex bg-white p-2 absolute top-12 left-0 z-10 rounded-lg"
+      onBlur={() => backToEditor()}
     >
       {editor.isEditable() && (
         <div className="flex items-center gap-2">
