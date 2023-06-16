@@ -58,6 +58,29 @@ function FloatingAIToolbar({
     }
   }, [popupCharStylesEditorRef]);
 
+  const escFunction = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        console.log("HERE");
+        //Do whatever when esc is pressed
+        editor.focus();
+        editor.update(() => {
+          const root = $getRoot();
+          root.getLastChild()?.remove();
+        });
+      }
+    },
+    [editor]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", escFunction, false);
+
+    return () => {
+      document.removeEventListener("keydown", escFunction, false);
+    };
+  }, [escFunction]);
+
   const updateAIFloatingToolbar = useCallback(() => {
     const popupCharStylesEditorElem = popupCharStylesEditorRef.current;
     const nativeSelection = window.getSelection();
@@ -126,6 +149,10 @@ function FloatingAIToolbar({
       {editor.isEditable() && (
         <div>
           <div>AI prompt</div>
+          <input
+            id="floating-ai-toolbar-input"
+            placeholder="Ask AI to write anything."
+          />
         </div>
       )}
     </div>
@@ -183,6 +210,7 @@ function useFloatingAIToolbarPlugin(
     return null;
   }
 
+  document.getElementById("floating-ai-toolbar-input")?.focus();
   return createPortal(
     <FloatingAIToolbar editor={editor} anchorElem={anchorElem} />,
     anchorElem
