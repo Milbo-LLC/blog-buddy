@@ -122,9 +122,7 @@ export default function Editor() {
           placeholder={<div />}
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <OnChangePlugin
-          onChange={(editorState) => console.log("editorState: ", editorState)}
-        />
+        <OnChangePlugin onChange={() => {}} />
         <ImagesPlugin />
         <HistoryPlugin />
         <AutoFocusPlugin />

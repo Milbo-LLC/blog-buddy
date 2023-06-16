@@ -14,6 +14,7 @@ import { createPortal } from "react-dom";
 import { getDOMRangeRect } from "../../utils/getDOMRangeRect";
 import { setFloatingElemPosition } from "../../utils/setFloatingElemPosition";
 import { HiSparkles } from "react-icons/hi";
+import { MdSend } from "react-icons/md";
 
 function FloatingAIToolbar({
   editor,
@@ -61,17 +62,31 @@ function FloatingAIToolbar({
     }
   }, [popupCharStylesEditorRef]);
 
-  function backToEditor() {
-    editor.focus();
-    editor.update(() => {
-      const lastChild = $getRoot().getLastChild();
-      if (lastChild) {
-        lastChild.clear();
+  const clickEscFunction = useCallback(
+    (event: any) => {
+      const { id } = event.target;
+      if (!id || !id.includes("floating-ai-toolbar")) {
+        editor.focus();
+        editor.update(() => {
+          const lastChild = $getRoot().getLastChild();
+          if (lastChild) {
+            lastChild.clear();
+          }
+        });
       }
-    });
-  }
+    },
+    [editor]
+  );
 
-  const escFunction = useCallback(
+  useEffect(() => {
+    document.addEventListener("click", clickEscFunction, false);
+
+    return () => {
+      document.removeEventListener("click", clickEscFunction, false);
+    };
+  }, [clickEscFunction]);
+
+  const keyboardEscFunction = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         editor.focus();
@@ -87,12 +102,12 @@ function FloatingAIToolbar({
   );
 
   useEffect(() => {
-    document.addEventListener("keydown", escFunction, false);
+    document.addEventListener("keydown", keyboardEscFunction, false);
 
     return () => {
-      document.removeEventListener("keydown", escFunction, false);
+      document.removeEventListener("keydown", keyboardEscFunction, false);
     };
-  }, [escFunction]);
+  }, [keyboardEscFunction]);
 
   const updateAIFloatingToolbar = useCallback(() => {
     const popupCharStylesEditorElem = popupCharStylesEditorRef.current;
@@ -158,16 +173,22 @@ function FloatingAIToolbar({
     <div
       ref={popupCharStylesEditorRef}
       className="flex bg-white p-2 absolute top-12 left-0 z-10 rounded-lg"
-      onBlur={() => backToEditor()}
+      id="floating-ai-toolbar"
     >
       {editor.isEditable() && (
         <div className="flex items-center gap-2">
-          <HiSparkles className="text-lg" />
+          <HiSparkles className="text-lg" id="floating-ai-toolbar-icon" />
           <input
             className="outline-none bg-transparent"
             id="floating-ai-toolbar-input"
             placeholder="Ask AI to write anything."
           />
+          <div
+            className="flex p-2 hover:bg-[#173F5F] hover:text-white rounded cursor-pointer"
+            id="floating-ai-toolbar-button"
+          >
+            <MdSend className="text-base" id="floating-ai-toolbar-button" />
+          </div>
         </div>
       )}
     </div>
