@@ -11,6 +11,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { getDOMRangeRect } from "../../utils/getDOMRangeRect";
 import { setFloatingElemPosition } from "../../utils/setFloatingElemPosition";
+import { HiSparkles } from "react-icons/hi";
 
 function FloatingAIToolbar({
   editor,
@@ -144,12 +145,13 @@ function FloatingAIToolbar({
   return (
     <div
       ref={popupCharStylesEditorRef}
-      className="flex bg-white p-2 absolute top-0 left-0 z-10 rounded-lg"
+      className="flex bg-white p-2 absolute top-12 left-0 z-10 rounded-lg"
     >
       {editor.isEditable() && (
-        <div>
-          <div>AI prompt</div>
+        <div className="flex items-center gap-2">
+          <HiSparkles className="text-lg" />
           <input
+            className="outline-none bg-transparent"
             id="floating-ai-toolbar-input"
             placeholder="Ask AI to write anything."
           />
