@@ -1,32 +1,54 @@
 "use client";
 
+// React
+import { useEffect, useState } from "react";
+
+// Editor Theme
 import ExampleTheme from "../themes/ExampleTheme";
+
+// Lexical components
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { TRANSFORMERS } from "@lexical/markdown";
+
+// Lexical built-in plugins
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
-import { ListItemNode, ListNode } from "@lexical/list";
-import { CodeHighlightNode, CodeNode } from "@lexical/code";
-import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { TRANSFORMERS } from "@lexical/markdown";
-import { CAN_USE_DOM } from "@/components/utils/canUseDOM";
 
-import LexicalContentEditable from "../ui/ContentEditable";
+// Custom plugins
 import ListMaxIndentLevelPlugin from "../plugins/ListMaxIndentLevelPlugin";
 import CodeHighlightPlugin from "../plugins/CodeHighlightPlugin";
 import AutoLinkPlugin from "../plugins/AutoLinkPlugin";
 import FloatingTextFormatToolbarPlugin from "../plugins/FloatingTextFormatToolbarPlugin";
 import DraggableBlockPlugin from "../plugins/DraggableBlockPlugin";
-import { useEffect, useState } from "react";
 import ToolbarPlugin from "../plugins/ToolbarPlugin";
 import HeaderPlugin from "../plugins/HeaderPlugin";
+import FloatingAIToolbarPlugin from "../plugins/FloatingAIToolbarPlugin";
+import ImagesPlugin from "../plugins/ImagesPlugin";
+import OnChangePlugin from "../plugins/OnChangePlugin";
 
+// Lexical built-in nodes
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
+import { ListItemNode, ListNode } from "@lexical/list";
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { HashtagNode } from "@lexical/hashtag";
+
+// Custom nodes
+import { ImageNode } from "../nodes/ImageNode";
+
+// Utils
+import { CAN_USE_DOM } from "@/components/utils/canUseDOM";
+
+// Custom Lexical components
+import LexicalContentEditable from "../ui/ContentEditable";
+
+// Initial editor configuration
 const editorConfig = {
   // The editor theme
   theme: ExampleTheme,
@@ -41,12 +63,14 @@ const editorConfig = {
     ListItemNode,
     QuoteNode,
     CodeNode,
+    ImageNode,
     CodeHighlightNode,
     TableNode,
     TableCellNode,
     TableRowNode,
     AutoLinkNode,
     LinkNode,
+    HashtagNode,
   ],
   namespace: "example",
 };
@@ -98,6 +122,10 @@ export default function Editor() {
           placeholder={<div />}
           ErrorBoundary={LexicalErrorBoundary}
         />
+        <OnChangePlugin
+          onChange={(editorState) => console.log("editorState: ", editorState)}
+        />
+        <ImagesPlugin />
         <HistoryPlugin />
         <AutoFocusPlugin />
         <CodeHighlightPlugin />
@@ -107,6 +135,7 @@ export default function Editor() {
         <ListMaxIndentLevelPlugin maxDepth={7} />
         <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
         <FloatingTextFormatToolbarPlugin />
+        <FloatingAIToolbarPlugin />
         {floatingAnchorElem && !isSmallWidthViewport && (
           <>
             <DraggableBlockPlugin anchorElem={floatingAnchorElem} />

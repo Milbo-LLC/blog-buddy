@@ -1,3 +1,5 @@
+"use client";
+
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $wrapNodeInElement, mergeRegister } from "@lexical/utils";
 import {
@@ -143,12 +145,13 @@ export function InsertImageDialog({
   console.log("in InsertImageDialog");
   const [mode, setMode] = useState<null | "url" | "file">(null);
   const hasModifier = useRef(false);
-
   useEffect(() => {
     hasModifier.current = false;
+    console.log("document: ", document);
     const handler = (e: KeyboardEvent) => {
       hasModifier.current = e.altKey;
     };
+
     document.addEventListener("keydown", handler);
     return () => {
       document.removeEventListener("keydown", handler);
@@ -202,7 +205,8 @@ export default function ImagesPlugin({
       editor.registerCommand<InsertImagePayload>(
         INSERT_IMAGE_COMMAND,
         (payload) => {
-          const imageNode = $createImageNode(payload);
+          const width = 400;
+          const imageNode = $createImageNode({ ...payload, width });
           $insertNodes([imageNode]);
           if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
             $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd();
@@ -239,10 +243,10 @@ export default function ImagesPlugin({
   return null;
 }
 
-const TRANSPARENT_IMAGE =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-const img = document.createElement("img");
-img.src = TRANSPARENT_IMAGE;
+// const TRANSPARENT_IMAGE =
+//   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+// const img = document.createElement("img");
+// img.src = TRANSPARENT_IMAGE;
 
 function onDragStart(event: DragEvent): boolean {
   const node = getImageNodeInSelection();
@@ -254,7 +258,7 @@ function onDragStart(event: DragEvent): boolean {
     return false;
   }
   dataTransfer.setData("text/plain", "_");
-  dataTransfer.setDragImage(img, 0, 0);
+  // dataTransfer.setDragImage(img, 0, 0);
   dataTransfer.setData(
     "application/x-lexical-drag",
     JSON.stringify({

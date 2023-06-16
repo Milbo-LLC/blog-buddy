@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
 import type {
   GridSelection,
   LexicalEditor,
@@ -8,14 +16,13 @@ import type {
 
 import "../ImageNode/index.css";
 
-import NextImage from "next/image";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { useCollaborationContext } from "@lexical/react/LexicalCollaborationContext";
 // import { CollaborationPlugin } from "@lexical/react/LexicalCollaborationPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-// import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
-// import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalNestedComposer } from "@lexical/react/LexicalNestedComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
@@ -49,7 +56,6 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import ImageResizer from "@/components/ui/ImageResiver";
 import Placeholder from "@/components/ui/Placeholder";
-// import { $isImageNode } from "./ImageNode";
 import { $isImageNode } from "../ImageNode";
 
 const imageCache = new Set();
@@ -86,7 +92,8 @@ function LazyImage({
 }): JSX.Element {
   useSuspenseImage(src);
   return (
-    <NextImage
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       className={className || undefined}
       src={src}
       alt={altText}
@@ -344,7 +351,7 @@ export default function ImageComponent({
               {/* <MentionsPlugin /> */}
               {/* <LinkPlugin /> */}
               {/* <EmojisPlugin /> */}
-              {/* <HashtagPlugin /> */}
+              <HashtagPlugin />
               {/* <KeywordsPlugin /> */}
               {/* {isCollabActive ? (
                 <CollaborationPlugin
@@ -355,6 +362,7 @@ export default function ImageComponent({
               ) : (
                 <HistoryPlugin externalHistoryState={historyState} />
               )} */}
+              <HistoryPlugin />
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable className="ImageNode__contentEditable" />

@@ -1,21 +1,13 @@
 import { DateTime } from "luxon";
 import { useState } from "react";
-import { FieldValues, UseFormSetValue, useForm } from "react-hook-form";
-
-const onSubmit = ({
-  data,
-  setValue,
-}: {
-  data: any;
-  setValue: UseFormSetValue<FieldValues>;
-}) => {
-  console.log("onSubmit - data: ", data);
-  console.log("onSubmit - setValue: ", setValue);
-};
 
 export default function HeaderPlugin(): JSX.Element {
+  // State variables
   const [title, setTitle] = useState<string>("");
   const [author, setAuthor] = useState<string>("");
+  const [publicationDate, setPublicationDate] = useState<string>(
+    DateTime.now().toFormat("MMMM dd, yyyy")
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,20 +33,11 @@ export default function HeaderPlugin(): JSX.Element {
           <input
             className="flex flex-1 outline-none bg-transparent"
             placeholder={DateTime.now().toFormat("MMMM dd, yyyy")}
+            value={publicationDate}
+            onChange={(e) => setPublicationDate(e.target.value)}
           />
         </div>
       </div>
-      {/* <input className="flex w-fit" /> */}
-      {/* <div className="text-2xl font-bold bg-green-400">
-        <div className="w-fit bg-blue-400">
-          <input className="outline-none bg-transparent" placeholder="Author" />
-        </div>
-        <span>•</span>
-        <input
-          className="flex flex-1 outline-none bg-transparent"
-          placeholder={DateTime.now().toFormat("MMMM dd, yyyy")}
-        />
-      </div> */}
     </div>
   );
 }
