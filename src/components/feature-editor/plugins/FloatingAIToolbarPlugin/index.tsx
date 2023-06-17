@@ -7,6 +7,7 @@ import {
   $getRoot,
   $getSelection,
   $createTextNode,
+  $createParagraphNode,
 } from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as React from "react";
@@ -15,6 +16,9 @@ import { getDOMRangeRect } from "../../utils/getDOMRangeRect";
 import { setFloatingElemPosition } from "../../utils/setFloatingElemPosition";
 import { HiSparkles } from "react-icons/hi";
 import { MdSend } from "react-icons/md";
+import Image from "next/image";
+import SendIcon from "@/assets/icons/send.svg";
+import { ClipLoader } from "react-spinners";
 
 function FloatingAIToolbar({
   editor,
@@ -24,6 +28,9 @@ function FloatingAIToolbar({
   anchorElem: HTMLElement;
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [prompt, setPrompt] = useState("");
 
   function mouseMoveListener(e: MouseEvent) {
     if (
@@ -169,6 +176,42 @@ function FloatingAIToolbar({
     );
   }, [editor, updateAIFloatingToolbar]);
 
+  const handleOpenAICall = async () => {
+    setLoading(true);
+    setPrompt("");
+    try {
+      const res = await fetch(`/api/ask-openai?prompt=${prompt}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+      });
+      const response = await res.json();
+      setLoading(false);
+      editor.update(() => {
+        // Get the RootNode from the EditorState
+        const root = $getRoot();
+
+        // Create a new ParagraphNode
+        const paragraphNode = $createParagraphNode();
+
+        // Create a new TextNode
+        const textNode = $createTextNode(response);
+
+        // Append the text node to the paragraph
+        paragraphNode.append(textNode);
+
+        // Finally, append the paragraph to the root
+        root.append(paragraphNode);
+      });
+      console.log("response: ", response);
+    } catch (error) {
+      setLoading(false);
+      console.log("error: ", error);
+    }
+  };
+
   return (
     <div
       ref={popupCharStylesEditorRef}
@@ -182,12 +225,31 @@ function FloatingAIToolbar({
             className="outline-none bg-transparent"
             id="floating-ai-toolbar-input"
             placeholder="Ask AI to write anything."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
           />
           <div
-            className="flex p-2 hover:bg-[#173F5F] hover:text-white rounded cursor-pointer"
+            className={`flex p-2 ${
+              !loading && "hover:bg-[#173F5F]"
+            } hover:text-white rounded cursor-pointer`}
             id="floating-ai-toolbar-button"
           >
-            <MdSend className="text-base" id="floating-ai-toolbar-button" />
+            <div
+              className="flex relative items-center justify-center w-4 h-4"
+              onClick={() => handleOpenAICall()}
+            >
+              {loading ? (
+                <ClipLoader color="#173F5F" size={15} />
+              ) : (
+                <Image
+                  className="text-white"
+                  id="floating-ai-toolbar-button-icon"
+                  fill
+                  src={SendIcon}
+                  alt={"send button"}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}

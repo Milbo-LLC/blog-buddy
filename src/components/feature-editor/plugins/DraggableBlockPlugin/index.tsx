@@ -26,6 +26,7 @@ import { MdDragIndicator } from "react-icons/md";
 import { isHTMLElement } from "@/components/utils/guard";
 import { Point } from "@/components/utils/point";
 import { Rect } from "@/components/utils/rect";
+import { Tooltip } from "@mui/material";
 
 const SPACE = 4;
 const TARGET_LINE_HALF_HEIGHT = 2;
@@ -352,15 +353,17 @@ function useDraggableBlockMenu(
 
   return createPortal(
     <>
-      <div
-        className="icon draggable-block-menu bg-white/80 hover:bg-white"
-        ref={menuRef}
-        draggable={true}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-      >
-        <div className={isEditable ? "icon" : ""} />
-      </div>
+      <Tooltip title="Drag to move" arrow>
+        <div
+          className="icon draggable-block-menu bg-white/80 hover:bg-white"
+          ref={menuRef}
+          draggable={true}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+        >
+          <div className={isEditable ? "icon" : ""} />
+        </div>
+      </Tooltip>
       <div className="draggable-block-target-line" ref={targetLineRef} />
     </>,
     anchorElem

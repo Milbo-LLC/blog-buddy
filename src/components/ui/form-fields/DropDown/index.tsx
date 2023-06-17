@@ -16,6 +16,7 @@ import {
 } from "react";
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { BiChevronDown } from "react-icons/bi";
 
 type DropDownContextType = {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void;
@@ -58,7 +59,7 @@ export function DropDownItem({
       title={title}
       type="button"
     >
-      {children}
+      <div className="flex">{children}</div>
     </button>
   );
 }

@@ -5,24 +5,29 @@ import { InsertImageDialog } from "../ImagesPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useEffect, useState } from "react";
 import { COMMAND_PRIORITY_CRITICAL, SELECTION_CHANGE_COMMAND } from "lexical";
+import { Tooltip } from "@mui/material";
 
 function ToolbarButton({
   Icon,
   label,
+  altText,
   onClick,
 }: {
   Icon: IconType;
   label: string;
+  altText?: string;
   onClick?: () => void;
 }): JSX.Element {
   return (
-    <div
-      className="flex w-fit items-center gap-1 p-2 hover:bg-white/20 rounded-lg cursor-pointer"
-      onClick={onClick}
-    >
-      <Icon className="text-2xl" />
-      <div>{label}</div>
-    </div>
+    <Tooltip title={altText} arrow>
+      <div
+        className="flex w-fit items-center gap-1 p-2 hover:bg-white/20 rounded-lg cursor-pointer"
+        onClick={onClick}
+      >
+        <Icon className="text-2xl" />
+        <div>{label}</div>
+      </div>
+    </Tooltip>
   );
 }
 
