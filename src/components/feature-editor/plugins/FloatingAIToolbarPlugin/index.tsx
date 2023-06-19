@@ -31,6 +31,11 @@ function FloatingAIToolbar({
 
   const [loading, setLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [streamedData, setStreamedData] = useState("");
+
+  useEffect(() => {
+    console.log("streamed Data: ", streamedData);
+  }, [streamedData]);
 
   function mouseMoveListener(e: MouseEvent) {
     if (
@@ -180,32 +185,35 @@ function FloatingAIToolbar({
     setLoading(true);
     setPrompt("");
     try {
-      const res = await fetch(`/api/ask-openai?prompt=${prompt}`, {
-        method: "GET",
+      const res = await fetch(`/api/ask-openai`, {
+        method: "POST",
         headers: {
           Accept: "application/json",
           "Content-type": "application/json",
         },
+        body: JSON.stringify({ prompt }),
       });
-      const response = await res.json();
+
+      const reader = res.body!.getReader();
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        const text = new TextDecoder().decode(value);
+        setStreamedData((prev: string) => prev + text);
+        editor.focus();
+        editor.update(() => {
+          const selection = $getSelection();
+          if (selection) {
+            selection.insertText(text);
+          }
+        });
+      }
       setLoading(false);
-      editor.update(() => {
-        // Get the RootNode from the EditorState
-        const root = $getRoot();
-
-        // Create a new ParagraphNode
-        const paragraphNode = $createParagraphNode();
-
-        // Create a new TextNode
-        const textNode = $createTextNode(response);
-
-        // Append the text node to the paragraph
-        paragraphNode.append(textNode);
-
-        // Finally, append the paragraph to the root
-        root.append(paragraphNode);
-      });
-      console.log("response: ", response);
     } catch (error) {
       setLoading(false);
       console.log("error: ", error);

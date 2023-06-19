@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { OpenAI } from "langchain/llms/openai";
-import { BufferMemory } from "langchain/memory";
 import { PromptTemplate } from "langchain";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const { prompt } = Object.fromEntries(searchParams.entries());
+// Handle Langchain logic
+const runLLMChain = async (prompt: string) => {
+  const encoder = new TextEncoder();
+  const stream = new TransformStream(); // streamable object
+  const writer = stream.writable.getWriter(); // writter object for writing to stream
 
   // Initalize the wrapper
   const model = new OpenAI({
@@ -13,6 +14,18 @@ export async function GET(request: Request) {
     temperature: 0.9,
     modelName: "gpt-3.5-turbo",
     streaming: true,
+    callbacks: [
+      {
+        async handleLLMNewToken(token) {
+          await writer.ready;
+          await writer.write(encoder.encode(`${token}`));
+        },
+        async handleLLMEnd() {
+          await writer.ready;
+          await writer.close();
+        },
+      },
+    ],
   });
 
   // Create model error handling
@@ -23,11 +36,8 @@ export async function GET(request: Request) {
     );
   }
 
-  const memory = new BufferMemory();
-  // const chain = new ConversationChain({ llm: model, memory: memory });
-
   const promptTemplate = new PromptTemplate({
-    template: `Write a blog post about “{prompt}”. The blog post should be formatted as Markdown, be a minimum of 1000 words, have a title, concise subtitle, clearly defined sections and conclusion.`,
+    template: `Write a blog post about “{prompt}”. The blog post should be formatted as Markdown, must have a minimum of 1000 words, must have a title, concise subtitle, and clearly defined sections and conclusion.`,
     inputVariables: ["prompt"],
   });
 
@@ -49,10 +59,14 @@ export async function GET(request: Request) {
       { status: 400 }
     );
   }
-  try {
-    const response = await model.call(formattedPrompt);
-    return NextResponse.json(response);
-  } catch (e) {
-    console.log(e);
-  }
+
+  model.call(formattedPrompt);
+
+  return stream.readable;
+};
+
+export async function POST(request: Request) {
+  const { prompt } = await request.json();
+  const stream = runLLMChain(prompt);
+  return new Response(await stream);
 }
