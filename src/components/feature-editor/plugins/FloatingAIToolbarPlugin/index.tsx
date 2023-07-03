@@ -19,6 +19,11 @@ import { MdSend } from "react-icons/md";
 import Image from "next/image";
 import SendIcon from "@/assets/icons/send.svg";
 import { ClipLoader } from "react-spinners";
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+  TRANSFORMERS,
+} from "@lexical/markdown";
 
 function FloatingAIToolbar({
   editor,
@@ -207,6 +212,11 @@ function FloatingAIToolbar({
         setStreamedData((prev: string) => prev + text);
         editor.focus();
         editor.update(() => {
+          console.log("text: ", text);
+          if (text.endsWith("\n\n")) {
+            console.log("new line");
+          }
+          console.log("streamedData: ", streamedData);
           const selection = $getSelection();
           if (selection) {
             selection.insertText(text);
