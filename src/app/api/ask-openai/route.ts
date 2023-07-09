@@ -89,6 +89,7 @@ export async function POST(req: Request) {
   // Initalize the wrapper
   const llm = new OpenAI({
     temperature: 0.9,
+    modelName: "gpt-4",
     streaming: true,
     callbacks: [handlers],
   });

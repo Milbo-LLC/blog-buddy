@@ -12,21 +12,26 @@ function ToolbarButton({
   label,
   altText,
   onClick,
+  disabled,
 }: {
   Icon: IconType;
   label: string;
   altText?: string;
   onClick?: () => void;
+  disabled?: string;
 }): JSX.Element {
   return (
-    <Tooltip title={altText} arrow>
-      <div
-        className="flex w-fit items-center gap-1 p-2 hover:bg-white/20 rounded-lg cursor-pointer"
+    <Tooltip title={altText || disabled} arrow>
+      <button
+        className={`flex w-fit items-center gap-1 p-2 hover:bg-white/20 rounded-lg ${
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+        }`}
         onClick={onClick}
+        disabled={Boolean(disabled)}
       >
         <Icon className="text-2xl" />
         <div>{label}</div>
-      </div>
+      </button>
     </Tooltip>
   );
 }
@@ -51,7 +56,7 @@ export default function ToolbarPlugin(): JSX.Element {
 
   return (
     <div className="flex gap-2 -mx-2">
-      <ToolbarButton label="Add cover" Icon={MdPhoto} />
+      <ToolbarButton label="Add cover" Icon={MdPhoto} disabled="Coming soon!" />
       <ToolbarButton
         label="Insert image"
         Icon={MdAddPhotoAlternate}

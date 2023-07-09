@@ -114,12 +114,16 @@ export default function Editor() {
         <RichTextPlugin
           contentEditable={
             <div className="">
-              <div className="" ref={onRef}>
+              <div className="relative" ref={onRef}>
                 <LexicalContentEditable />
               </div>
             </div>
           }
-          placeholder={<div />}
+          placeholder={
+            <div className="absolute top-2 left-2 lg:left-8 text-white/40">
+              Press space on a new line for AI.
+            </div>
+          }
           ErrorBoundary={LexicalErrorBoundary}
         />
         <OnChangePlugin onChange={() => {}} />
